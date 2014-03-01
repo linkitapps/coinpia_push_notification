@@ -13,8 +13,17 @@
     <style>
         #userinfo,
         #signin-form,
+        .card,
         #messages {
             display: none;
+        }
+        
+        #messages li {
+            overflow: hidden;
+        }
+        
+        #messages span {
+            float: right;
         }
     </style>
 
@@ -151,6 +160,7 @@
                     crossDomain: true,
                     success: function(data) {
                         if (data.length) {
+                            $('.card').show();
                             $('#messages').show();
                             
                             var html = '';
@@ -259,6 +269,8 @@
                             $('#nickname').text('');
                             $('#nickname').data('user_id', '');
                             $('#userinfo').hide();
+                            $('.card').hide();
+                            $('#messages').hide();
                         } else {
                             // signout fail
                             alert('로그아웃에 실패하였습니다.');
@@ -285,8 +297,8 @@
         
         <form id="signin-form">
             <input type="hidden" id="device_id">
-            <input type="email" id="email">
-            <input type="password" id="password">
+            <input type="email" id="email" placeholder="이메일">
+            <input type="password" id="password" placeholder="패스워드">
             <a class="btn btn-positive btn-block" id="signin-btn">로그인</a>
         </form>
         
