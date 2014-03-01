@@ -19,7 +19,7 @@
         }
         
         #messages li {
-            overflow: hidden;
+            padding-right: 15px;
         }
         
         #messages span {
@@ -93,6 +93,7 @@
                     // you might want to play a sound to get the user's attention, throw up a dialog, etc.
                     if (e.foreground) {
                         // 앱 열려 있을 때 notification 오는 경우
+                        showMessages();
                     }
                     else {   // otherwise we were launched because the user touched a notification in the notification tray.
                         if (e.coldstart) {
@@ -174,6 +175,8 @@
                     }
                 });
             }
+            
+            window.showMessages = showMessages;
             
             // signin btn click
             $('#signin-btn').on('click', function() {
