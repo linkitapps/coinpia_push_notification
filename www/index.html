@@ -1,206 +1,300 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Coinpia Push Notification</title>
+<head>
     <meta charset="utf-8">
+    <title>Coinpia Push Notification</title>
 
+    <!-- Sets initial viewport load and disables zooming  -->
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <!-- Include the compiled Ratchet CSS -->
+    <link type="text/css" rel="stylesheet" href="ratchet/ratchet.css">
+    
+    <style>
+        #userinfo,
+        #signin-form,
+        #messages {
+            display: none;
+        }
+    </style>
+
+    <!-- Include the compiled Ratchet JS -->
+    <script type="text/javascript" src="ratchet/ratchet.js"></script>
+    
     <script type="text/javascript" src="phonegap.js"></script>
     <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="js/PushNotification.js"></script>
     <script type="text/javascript">
-            var pushNotification;
-            
-            function onDeviceReady() {
-                $("#app-status-ul").append('<li>deviceready event received</li>');
+        /*
+         * Push Notification
+         */
+        
+        var pushNotification;
+        
+        function onDeviceReady() {
+            document.addEventListener("backbutton", function(e) {
+                e.preventDefault();
+                navigator.app.exitApp();
                 
-                document.addEventListener("backbutton", function(e)
-                {
-                    $("#app-status-ul").append('<li>backbutton event received</li>');
-                    
-                    if( $("#home").length > 0)
-                    {
-                        // call this to get a new token each time. don't call it to reuse existing token.
-                        //pushNotification.unregister(successHandler, errorHandler);
-                        e.preventDefault();
-                        navigator.app.exitApp();
-                    }
-                    else
-                    {
-                        navigator.app.backHistory();
-                    }
-                }, false);
+                // navigator.app.backHistory();
+            }, false);
 
-                try 
-                { 
-                    pushNotification = window.plugins.pushNotification;
-                    if (device.platform == 'android' || device.platform == 'Android') {
-                        $("#app-status-ul").append('<li>registering android</li>');
-                        pushNotification.register(successHandler, errorHandler, {"senderID":"114359002704","ecb":"onNotificationGCM"});     // required!
-                    } else {
-                        $("#app-status-ul").append('<li>registering iOS</li>');
-                        pushNotification.register(tokenHandler, errorHandler, {"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});    // required!
-                    }
-                }
-                catch(err) 
-                { 
-                    txt="There was an error on this page.\n\n"; 
-                    txt+="Error description: " + err.message + "\n\n"; 
-                    alert(txt); 
-                } 
-            }
-            
-            // handle APNS notifications for iOS
-            function onNotificationAPN(e) {
-                if (e.alert) {
-                     $("#app-status-ul").append('<li>push-notification: ' + e.alert + '</li>');
-                     navigator.notification.alert(e.alert);
-                }
-                    
-                if (e.sound) {
-                    var snd = new Media(e.sound);
-                    snd.play();
-                }
-                
-                if (e.badge) {
-                    pushNotification.setApplicationIconBadgeNumber(successHandler, e.badge);
+            try { 
+                pushNotification = window.plugins.pushNotification;
+                if (device.platform == 'android' || device.platform == 'Android') {
+                    pushNotification.register(successHandler, errorHandler, {"senderID":"114359002704","ecb":"onNotificationGCM"});     // required!
+                } else {
+                    pushNotification.register(tokenHandler, errorHandler, {"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});    // required!
                 }
             }
-            
-            // handle GCM notifications for Android
-            function onNotificationGCM(e) {
-                $("#app-status-ul").append('<li>EVENT -> RECEIVED:' + e.event + '</li>');
+            catch(err) { 
+                txt = "There was an error on this page.\n\n"; 
+                txt += "Error description: " + err.message + "\n\n"; 
+                alert(txt); 
+            } 
+        }
+        
+        // handle APNS notifications for iOS
+        function onNotificationAPN(e) {
+            if (e.alert) {
+                 navigator.notification.alert(e.alert);
+            }
                 
-                switch( e.event )
-                {
-                    case 'registered':
-                    if ( e.regid.length > 0 )
-                    {
-                        $("#app-status-ul").append('<li>REGISTERED -> REGID:' + e.regid + "</li>");
-                        // Your GCM push server needs to know the regID before it can push to this device
-                        // here is where you might want to send it the regID for later use.
-                        console.log("regID = " + e.regid);
+            if (e.sound) {
+                var snd = new Media(e.sound);
+                snd.play();
+            }
+            
+            if (e.badge) {
+                pushNotification.setApplicationIconBadgeNumber(successHandler, e.badge);
+            }
+        }
+        
+        // handle GCM notifications for Android
+        function onNotificationGCM(e) {
+            switch( e.event ) {
+                case 'registered':
+                    if ( e.regid.length > 0 ) {
                         $('#device_id').val(e.regid);
                     }
-                    break;
-                    
-                    case 'message':
-                        // if this flag is set, this notification happened while we were in the foreground.
-                        // you might want to play a sound to get the user's attention, throw up a dialog, etc.
-                        if (e.foreground)
-                        {
-                            $("#app-status-ul").append('<li>--INLINE NOTIFICATION--' + '</li>');
-
-                            // if the notification contains a soundname, play it.
-                            var my_media = new Media("/android_asset/www/"+e.soundname);
-                            my_media.play();
-                        }
-                        else
-                        {   // otherwise we were launched because the user touched a notification in the notification tray.
-                            if (e.coldstart)
-                                $("#app-status-ul").append('<li>--COLDSTART NOTIFICATION--' + '</li>');
-                            else
-                            $("#app-status-ul").append('<li>--BACKGROUND NOTIFICATION--' + '</li>');
-                        }
-
-                        $("#app-status-ul").append('<li>MESSAGE -> MSG: ' + e.payload.message + '</li>');
-                        $("#app-status-ul").append('<li>MESSAGE -> MSGCNT: ' + e.payload.msgcnt + '</li>');
-                    break;
-                    
-                    case 'error':
-                        $("#app-status-ul").append('<li>ERROR -> MSG:' + e.msg + '</li>');
-                    break;
-                    
-                    default:
-                        $("#app-status-ul").append('<li>EVENT -> Unknown, an event was received and we do not know what it is</li>');
-                    break;
-                }
-            }
-            
-            function tokenHandler (result) {
-                $("#app-status-ul").append('<li>token: '+ result +'</li>');
-                // Your iOS push server needs to know the token before it can push to this device
-                // here is where you might want to send it the token for later use.
-            }
-
-            function successHandler (result) {
-                $("#app-status-ul").append('<li>success:'+ result +'</li>');
-            }
-            
-            function errorHandler (error) {
-                $("#app-status-ul").append('<li>error:'+ error +'</li>');
-            }
-            
-            document.addEventListener('deviceready', onDeviceReady, true);
-
-
-
-
-            document.addEventListener('deviceready', function() {
+                break;
                 
-                $('#signin-form').on('submit', function(e) {
-                    e.preventDefault();
-                    
-                    var email = $('#email').val(),
-                        password = $('#password').val(),
-                        deviceId = $('#device_id').val();
-                        
-                    if ( ! email) {
-                        alert('이메일을 입력해 주십시오');
-                        $('#email').focus();
-                        return false;
+                case 'message':
+                    // if this flag is set, this notification happened while we were in the foreground.
+                    // you might want to play a sound to get the user's attention, throw up a dialog, etc.
+                    if (e.foreground) {
+                        // 앱 열려 있을 때 notification 오는 경우
                     }
-                    
-                    if ( ! password) {
-                        alert('패스워드를 입력해 주십시오');
-                        $('#password').focus();
-                        return false;
-                    }
-                    
-                    $.ajax({
-                        url: 'http://coinpia.com/notification/user_signin_ajax',
-                        type: 'GET',
-                        contentType: 'application/json',  
-                        data: {
-                            email: email,
-                            password: password,
-                            device_id: deviceId
-                        },
-                        dataType: 'jsonp',
-                        crossDomain: true,
-                        success: function(data) {
-                            alert(data.result);
-                            if (data.result == 'success') {
-                                alert(data.device_id);
-                            }
+                    else {   // otherwise we were launched because the user touched a notification in the notification tray.
+                        if (e.coldstart) {
+                            // COLDSTART NOTIFICATION
+                        } else {
+                            // BACKGROUND NOTIFICATION
                         }
-                    });
+                    }
+                break;
+                
+                case 'error':
+                    
+                break;
+                
+                default:
+                    
+                break;
+            }
+        }
+        
+        function tokenHandler (result) {
+            // Your iOS push server needs to know the token before it can push to this device
+            // here is where you might want to send it the token for later use.
+        }
+
+        function successHandler (result) {
+            
+        }
+        
+        function errorHandler (error) {
+            
+        }
+        
+        document.addEventListener('deviceready', onDeviceReady, true);
+    </script>
+    <script type="text/javascript">
+        /*
+         * signin, signout, message list
+         */
+        
+        document.addEventListener('deviceready', function() {
+            
+            // 로그인 상태
+            if (localStorage.coinpia_user_id) {
+                $('#userinfo').show();
+                $('#nickname').text(localStorage.coinpia_nickname);
+                
+                showMessages();
+            }
+            // 로그아웃 상태
+            else {
+                $('#signin-form').show();
+            }
+            
+            // message list
+            function showMessages() {
+                $.ajax({
+                    url: 'http://coinpia.com/notification/read_message_ajax',
+                    type: 'GET',
+                    contentType: 'application/json',  
+                    data: {
+                        user_id: localStorage.coinpia_user_id
+                    },
+                    dataType: 'jsonp',
+                    crossDomain: true,
+                    success: function(data) {
+                        if (data.length) {
+                            $('#messages').show();
+                            
+                            var html = '';
+                            
+                            $(data).each(function() {
+                                html += '<li class="table-view-cell"><strong>' + this.message + '</strong><span>' + this.timestamp + '</span></li>';
+                            });
+                            
+                            $('#messages').html(html);
+                        }
+                    }
                 });
+            }
+            
+            // signin btn click
+            $('#signin-btn').on('click', function() {
+                $('#signin-form').submit();
+            });
+            
+            // signin form
+            $('#signin-form').on('submit', function(e) {
+                e.preventDefault();
                 
-            }, true);
-         </script>
-  </head>
-  <body>
-    <div id="home">
-        <div class="signin-form">
-            <form id="signin-form" method="post">
-                <input type="hidden" name="device_id" id="device_id">
-                <fieldset>
-                    <input type="text" name="email" id="email">
-                </fieldset>
-                <fieldset>
-                    <input type="password" name="password" id="password">
-                </fieldset>
-                <fieldset>
-                    <input type="submit" value="로그인">
-                </fieldset>
-            </form>
+                var email = $('#email').val(),
+                    password = $('#password').val(),
+                    deviceId = $('#device_id').val();
+                    
+                if ( ! email) {
+                    alert('이메일을 입력해 주십시오');
+                    $('#email').focus();
+                    return false;
+                }
+                
+                if ( ! password) {
+                    alert('패스워드를 입력해 주십시오');
+                    $('#password').focus();
+                    return false;
+                }
+                
+                $.ajax({
+                    url: 'http://coinpia.com/notification/user_signin_ajax',
+                    type: 'GET',
+                    contentType: 'application/json',  
+                    data: {
+                        email: email,
+                        password: password,
+                        device_id: deviceId
+                    },
+                    dataType: 'jsonp',
+                    crossDomain: true,
+                    success: function(data) {
+                        if (data.result == 'success') {
+                            // signin success
+                            
+                            localStorage.coinpia_user_id = data.user_id;
+                            localStorage.coinpia_nickname = data.nickname;
+                            localStorage.coinpia_device_id = data.device_id;
+                            
+                            $('#signin-form').hide();
+                            $('#nickname').text(data.nickname);
+                            $('#userinfo').show();
+                            
+                            showMessages();
+                        } else {
+                            // signin fail
+                            alert('로그인에 실패하였습니다.');
+                        }
+                    }
+                });
+            });
+            
+            // signout btn click
+            $('#signout-btn').on('click', function() {
+                var userId = localStorage.coinpia_user_id,
+                    deviceId = localStorage.coinpia_device_id;
+                    
+                if ( ! userId) {
+                    alert('user_id 가 없습니다.');
+                    return false;
+                }
+                
+                if ( ! deviceId) {
+                    alert('device id 가 없습니다.');
+                    return false;
+                }
+                
+                $.ajax({
+                    url: 'http://coinpia.com/notification/user_signout_ajax',
+                    type: 'GET',
+                    contentType: 'application/json',  
+                    data: {
+                        user_id: userId,
+                        device_id: deviceId
+                    },
+                    dataType: 'jsonp',
+                    crossDomain: true,
+                    success: function(data) {
+                        if (data.result == 'success') {
+                            // signout success
+                            
+                            localStorage.coinpia_user_id = '';
+                            localStorage.coinpia_nickname = '';
+                            localStorage.coinpia_device_id = '';
+                            
+                            $('#signin-form').show();
+                            $('#nickname').text('');
+                            $('#nickname').data('user_id', '');
+                            $('#userinfo').hide();
+                        } else {
+                            // signout fail
+                            alert('로그아웃에 실패하였습니다.');
+                        }
+                    }
+                });
+            });
+            
+        }, true);
+    </script>
+</head>
+<body>
+
+    <!-- Make sure all your bars are the first things in your <body> -->
+    <header class="bar bar-nav">
+      <h1 class="title">코인피아</h1>
+    </header>
+    
+    <div class="content">
+    
+        <ul id="userinfo" class="table-view">
+            <li class="table-view-cell"><span id="nickname"></span> <a class="btn btn-positive" id="signout-btn">로그아웃</a></li>
+        </ul>
+        
+        <form id="signin-form">
+            <input type="hidden" id="device_id">
+            <input type="email" id="email">
+            <input type="password" id="password">
+            <a class="btn btn-positive btn-block" id="signin-btn">로그인</a>
+        </form>
+        
+        <div class="card">
+            <ul class="table-view" id="messages"></ul>
         </div>
         
-        <div id="app-status-div">
-            <ul id="app-status-ul">
-                <li>Coinpia PushNotification Demo</li>
-            </ul>
-        </div>
     </div>
-  </body>
+
+</body>
 </html>
