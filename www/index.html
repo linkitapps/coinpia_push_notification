@@ -158,13 +158,15 @@
                     
                     $.ajax({
                         url: 'http://coinpia.com/notification/user_signin_ajax',
-                        type: 'POST',
+                        type: 'GET',
+                        contentType: 'application/json',  
                         data: {
                             email: email,
                             password: password,
                             os: os
                         },
-                        dataType: 'json',
+                        dataType: 'jsonp',
+                        crossDomain: true,
                         success: function(data) {
                             alert(data.result);
                         }
