@@ -43,10 +43,9 @@
         function onDeviceReady() {
             document.addEventListener("backbutton", function(e) {
                 e.preventDefault();
+                navigator.app.exitApp();
                 
-                //navigator.app.exitApp();
-                
-                navigator.app.backHistory();
+                // navigator.app.backHistory();
             }, false);
 
             try { 
