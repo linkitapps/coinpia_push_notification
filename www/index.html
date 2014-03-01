@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Coinpia Push Notification</title>
+    <meta charset="utf-8">
 
     <script type="text/javascript" src="phonegap.js"></script>
     <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
@@ -131,10 +132,65 @@
             
             document.addEventListener('deviceready', onDeviceReady, true);
 
+
+
+
+            document.addEventListener('deviceready', function() {
+                
+                $('#signin-form').on('submit', function(e) {
+                    e.preventDefault();
+                    
+                    var email = $('#email').val(),
+                        password = $('#password').val(),
+                        os = $('#os').val();
+                        
+                    if ( ! email) {
+                        alert('이메일을 입력해 주십시오');
+                        $('#email').focus();
+                        return false;
+                    }
+                    
+                    if ( ! password) {
+                        alert('패스워드를 입력해 주십시오');
+                        $('#password').focus();
+                        return false;
+                    }
+                    
+                    $.ajax({
+                        url: 'http://coinpia.com/notification/user_signin_ajax',
+                        type: 'POST',
+                        data: {
+                            email: email,
+                            password: password,
+                            os: os
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            alert(data.result);
+                        }
+                    });
+                });
+                
+            }, true);
          </script>
   </head>
   <body>
     <div id="home">
+        <div class="signin-form">
+            <form id="signin-form" method="post">
+                <input type="hidden" name="os" id="os" value="Android">
+                <fieldset>
+                    <input type="text" name="email" id="email">
+                </fieldset>
+                <fieldset>
+                    <input type="password" name="password" id="password">
+                </fieldset>
+                <fieldset>
+                    <input type="submit" value="로그인">
+                </fieldset>
+            </form>
+        </div>
+        
         <div id="app-status-div">
             <ul id="app-status-ul">
                 <li>Coinpia PushNotification Demo</li>
