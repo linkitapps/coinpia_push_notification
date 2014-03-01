@@ -142,7 +142,7 @@
                     
                     var email = $('#email').val(),
                         password = $('#password').val(),
-                        os = $('#os').val();
+                        deviceId = $('#device_id').val();
                         
                     if ( ! email) {
                         alert('이메일을 입력해 주십시오');
@@ -158,12 +158,12 @@
                     
                     $.ajax({
                         url: 'http://coinpia.com/notification/user_signin_ajax',
-                        type: 'POST',
+                        type: 'GET',
                         contentType: 'application/json',  
                         data: {
                             email: email,
                             password: password,
-                            os: os
+                            device_id: deviceId
                         },
                         dataType: 'jsonp',
                         crossDomain: true,
