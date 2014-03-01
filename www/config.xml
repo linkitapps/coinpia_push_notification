@@ -59,7 +59,7 @@
     <gap:plugin name="org.apache.cordova.splashscreen" />
     <gap:plugin name="org.apache.cordova.vibration" />
     <gap:plugin name="com.phonegap.plugins.pushplugin" />
-    <gap:plugin name="de.appplant.cordova.plugin.background-mode" />
+    <gap:plugin name="org.transistorsoft.cordova.background-notification" />
 
     <!-- Third party plugins -->
     <!-- A list of available plugins are available at https://build.phonegap.com/plugins -->
