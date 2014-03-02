@@ -42,7 +42,10 @@
         
         function onDeviceReady() {
             document.addEventListener("backbutton", function(e) {
-                //e.preventDefault();
+                e.preventDefault();
+                
+                window.plugin.backgroundMode.enable();
+                
                 //navigator.app.exitApp();
                 
                 // navigator.app.backHistory();
