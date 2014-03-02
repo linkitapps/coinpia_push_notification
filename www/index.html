@@ -42,10 +42,8 @@
         
         function onDeviceReady() {
             document.addEventListener("backbutton", function(e) {
-                e.preventDefault();
-                
-                window.plugin.backgroundMode.enable();
-                navigator.app.exitApp();
+                //e.preventDefault();
+                //navigator.app.exitApp();
                 
                 // navigator.app.backHistory();
             }, false);
