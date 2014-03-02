@@ -43,6 +43,8 @@
         function onDeviceReady() {
             document.addEventListener("backbutton", function(e) {
                 e.preventDefault();
+                
+                window.plugin.backgroundMode.enable();
                 navigator.app.exitApp();
                 
                 // navigator.app.backHistory();
@@ -135,14 +137,6 @@
          */
         
         document.addEventListener('deviceready', function() {
-            
-            var ul = $('ul');
-            for (i in navigator.app) {
-                var li = '<li>' + i + '</li>';
-                ul.append(li);
-            }
-            
-            $('body').append('ul');
             
             // 로그인 상태
             if (localStorage.coinpia_user_id) {
